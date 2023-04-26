@@ -16,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private static int idNumberSeq = 0;
-    Map<Integer, Film> filmsMap = new HashMap<>();
+    private final Map<Integer, Film> filmsMap = new HashMap<>();
 
     @GetMapping
     public Collection<Film> getAllFilms() {

@@ -17,7 +17,7 @@ import java.util.Objects;
 @RequestMapping("/users")
 public class UserController {
     private static int idNumberSeq = 0;
-    Map<Integer, User> usersMap = new HashMap<>();
+    private final Map<Integer, User> usersMap = new HashMap<>();
 
     @GetMapping
     public Collection<User> getAllUsers() {

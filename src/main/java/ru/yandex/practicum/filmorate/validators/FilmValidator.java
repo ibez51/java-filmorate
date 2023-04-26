@@ -3,16 +3,19 @@ package ru.yandex.practicum.filmorate.validators;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class FilmValidator {
     public static String validate(Film film) {
         StringBuilder retBuilder = new StringBuilder();
 
-        if (film.getName().isBlank()) {
+        if (Objects.isNull(film.getName())
+                || film.getName().isBlank()) {
             retBuilder.append("Название фильма не может быть пустым.").append(System.lineSeparator());
         }
 
-        if (film.getDescription().length() > 200) {
+        if (!Objects.isNull(film.getDescription())
+        && film.getDescription().length() > 200) {
             retBuilder.append("Описание фильма не может превышать 200 символов.").append(System.lineSeparator());
         }
 

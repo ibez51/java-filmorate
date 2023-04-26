@@ -29,10 +29,10 @@ class FilmValidatorTest {
 
         assertEquals("", FilmValidator.validate(film));
 
-        film.setDescription("Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description Film descript");
+        film.setDescription("a".repeat(200));
         assertEquals("", FilmValidator.validate(film));
 
-        film.setDescription("Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description Film description");
+        film.setDescription("a".repeat(210));
         String estimatedValue = "Описание фильма не может превышать 200 символов." + System.lineSeparator();
         assertEquals(estimatedValue, FilmValidator.validate(film));
     }
