@@ -1,16 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.FilmStorage.UserStorage;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class UserService {
     private final UserStorage userStorage;
@@ -45,7 +43,7 @@ public class UserService {
 
         return user.getFriendsSet().stream()
                 .sorted(Integer::compareTo)
-                .map(userStorage::findUserById)
+                .map(userStorage::findUser)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -55,7 +53,7 @@ public class UserService {
 
         return user.getFriendsSet().stream()
                 .filter(x -> otherUser.getFriendsSet().contains(x))
-                .map(userStorage::findUserById)
+                .map(userStorage::findUser)
                 .collect(Collectors.toSet());
     }
 }

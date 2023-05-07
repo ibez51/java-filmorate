@@ -11,28 +11,33 @@ import java.util.Objects;
 public class FilmValidator {
     public static void validate(Film film) {
 
-        if (Objects.isNull(film.getName())
-                || film.getName().isBlank()) {
-            log.warn("Film {} has validation errors.", film);
+        if (Objects.isNull(film.getName())) {
+            log.warn("Film {} has validation errors: field name is null.", film);
+
+            throw new FilmValidationException("Название фильма обязательно к заполнению.");
+        }
+
+        if (film.getName().isBlank()) {
+            log.warn("Film {} has validation errors: field name is blank.", film);
 
             throw new FilmValidationException("Название фильма не может быть пустым.");
         }
 
         if (!Objects.isNull(film.getDescription())
                 && film.getDescription().length() > 200) {
-            log.warn("Film {} has validation errors.", film);
+            log.warn("Film {} has validation errors: field description contains > 200 symbols.", film);
 
             throw new FilmValidationException("Описание фильма не может превышать 200 символов.");
         }
 
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Film {} has validation errors.", film);
+            log.warn("Film {} has validation errors: field releaseDate is before 28.12.1895.", film);
 
             throw new FilmValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года.");
         }
 
         if (film.getDuration() <= 0) {
-            log.warn("Film {} has validation errors.", film);
+            log.warn("Film {} has validation errors: field duration is negative or equals zero.", film);
 
             throw new FilmValidationException("Продолжительность фильма должна быть положительной.");
         }

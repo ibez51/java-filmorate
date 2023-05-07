@@ -30,7 +30,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRuntimeError(final RuntimeException ex) {
+    public ErrorResponse handleRuntimeError(final Exception ex) {
         return new ErrorResponse(ex.getMessage());
     }
 }

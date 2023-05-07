@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.FilmStorage;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     public Film findFilm(Integer filmId) {
-        Film film = findFilmById(filmId);
+        Film film = filmsMap.get(filmId);
 
         if (Objects.isNull(film)) {
             throw new NullPointerException("Фильм с Id = " + filmId + " не найден.");
@@ -47,7 +47,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (filmsMap.containsKey(film.getId())) {
             filmsMap.put(film.getId(), film);
 
-            log.info("Film {} added successfully", film);
+            log.info("Film {} updated successfully", film);
         } else {
             log.warn("Film with id {} wasn't found", film.getId());
 
@@ -65,9 +65,5 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public void resetIdNumberSeq() {
         idNumberSeq = 0;
-    }
-
-    public Film findFilmById(Integer filmId) {
-        return filmsMap.get(filmId);
     }
 }
