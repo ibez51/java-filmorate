@@ -1,31 +1,55 @@
 package ru.yandex.practicum.filmorate.validators;
 
+import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exceptions.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Slf4j
 public class UserValidator {
+    public static void validate(User user) {
+        if (Objects.isNull(user.getEmail())) {
+            log.warn("User {} has validation errors: field email is null.", user);
 
-    public static String validate(User user) {
-        StringBuilder retBuilder = new StringBuilder();
-
-        if (Objects.isNull(user.getEmail())
-                || user.getEmail().isBlank()
-                || !user.getEmail().contains("@")) {
-            retBuilder.append("Электронная почта пользователя не может быть пустой и должна содержать символ @").append(System.lineSeparator());
+            throw new UserValidationException("Электронная почта пользователя обязательна к заполнению.");
         }
 
-        if (Objects.isNull(user.getLogin())
-                || user.getLogin().isBlank()
-                || user.getLogin().contains(" ")) {
-            retBuilder.append("Логин пользователя не может быть пустым или содержать пробелы").append(System.lineSeparator());
+        if (user.getEmail().isBlank()) {
+            log.warn("User {} has validation errors: field email is blank.", user);
+
+            throw new UserValidationException("Электронная почта пользователя не может быть пустой.");
+        }
+
+        if (!user.getEmail().contains("@")) {
+            log.warn("User {} has validation errors: field email does not contain @.", user);
+
+            throw new UserValidationException("Электронная почта пользователя должна содержать символ @.");
+        }
+
+        if (Objects.isNull(user.getLogin())) {
+            log.warn("User {} has validation errors: field login is null.", user);
+
+            throw new UserValidationException("Логин пользователя обязателен к заполнению.");
+        }
+
+        if (user.getLogin().isBlank()) {
+            log.warn("User {} has validation errors: field login is blank.", user);
+
+            throw new UserValidationException("Логин пользователя не может быть пустым.");
+        }
+
+        if (user.getLogin().contains(" ")) {
+            log.warn("User {} has validation errors: field login contains space symbol.", user);
+
+            throw new UserValidationException("Логин пользователя не может содержать пробелы.");
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            retBuilder.append("Дата рождения пользователя не может быть в будущем").append(System.lineSeparator());
-        }
+            log.warn("User {} has validation errors: field birthday is after now().", user);
 
-        return retBuilder.toString();
+            throw new UserValidationException("Дата рождения пользователя не может быть в будущем.");
+        }
     }
 }
