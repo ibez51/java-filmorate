@@ -1,53 +1,53 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
+import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage,
-                       UserStorage userStorage) {
+    public FilmService(@Qualifier("dbStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    }
+
+    public Collection<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
+
+    public Film getFilm(Integer filmId) {
+        return filmStorage.findFilm(filmId);
+    }
+
+    public Film addFilm(Film film) {
+        FilmValidator.validate(film);
+
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        FilmValidator.validate(film);
+
+        return filmStorage.updateFilm(film);
     }
 
     public Film likeFilm(Integer filmId, Integer userId) {
-        Film film = filmStorage.findFilm(filmId);
-        userStorage.findUser(userId);//check is User exists
-
-        film.getUserLikesSet().add(userId);
-
-        return film;
+        return filmStorage.likeFilm(filmId, userId);
     }
 
     public Film dislikeFilm(Integer filmId, Integer userId) {
-        Film film = filmStorage.findFilm(filmId);
-        User user = userStorage.findUser(userId);
-
-        if (!film.getUserLikesSet().contains(userId)) {
-            throw new NullPointerException("Не найден лайк пользователя " + userId);
-        }
-
-        film.getUserLikesSet().remove(user.getId());
-
-        return film;
+        return filmStorage.dislikeFilm(filmId, userId);
     }
 
     public Set<Film> getTopPopularFilms(Integer filmsCount) {
-        return filmStorage.getAllFilms().stream()
-                .sorted((x, y) -> y.getUserLikesSet().size() - x.getUserLikesSet().size())
-                .limit(filmsCount)
-                .collect(Collectors.toSet());
+        return filmStorage.getTopPopularFilms(filmsCount);
     }
 }

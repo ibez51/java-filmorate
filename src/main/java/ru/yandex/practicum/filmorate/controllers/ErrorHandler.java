@@ -25,7 +25,9 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundError(final NullPointerException ex) {
+        ex.printStackTrace();
         return new ErrorResponse(ex.getMessage());
+
     }
 
     @ExceptionHandler

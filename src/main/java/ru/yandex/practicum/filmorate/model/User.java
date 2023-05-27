@@ -14,11 +14,12 @@ import java.util.Set;
 public class User {
     private int id;
     @NotBlank
-    @Email
+    @Email(message = "Некорректно указан email")
     private String email;
     @NotBlank
     private String login;
     private String name;
     private LocalDate birthday;
-    private final Set<Integer> friendsSet = new HashSet<>();
+    @Builder.Default
+    private Set<Integer> friendsSet = new HashSet<>();
 }

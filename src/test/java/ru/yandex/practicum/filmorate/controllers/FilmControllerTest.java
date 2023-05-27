@@ -24,10 +24,10 @@ class FilmControllerTest {
 
     @BeforeEach
     void init() {
-        filmStorage = new InMemoryFilmStorage();
         userStorage = new InMemoryUserStorage();
-        filmService = new FilmService(filmStorage, userStorage);
-        filmController = new FilmController(filmStorage, filmService);
+        filmStorage = new InMemoryFilmStorage(userStorage);
+        filmService = new FilmService(filmStorage);
+        filmController = new FilmController(filmService);
 
         filmStorage.resetIdNumberSeq();
     }
