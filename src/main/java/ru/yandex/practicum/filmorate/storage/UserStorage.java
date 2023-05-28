@@ -10,9 +10,9 @@ public interface UserStorage {
 
     User findUser(Integer userId);
 
-    User addUser(User user);
+    Integer addUser(User user);
 
-    User updateUser(User user);
+    void updateUser(User user);
 
     User addFriends(Integer userId, Integer friendId);
 

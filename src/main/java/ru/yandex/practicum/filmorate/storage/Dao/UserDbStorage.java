@@ -2,26 +2,27 @@ package ru.yandex.practicum.filmorate.storage.Dao;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FriendshipService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
 @Qualifier("dbStorage")
-@AllArgsConstructor
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final FriendshipService friendshipService;
 
     @Override
     public Collection<User> getAllUsers() {
@@ -32,27 +33,15 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User findUser(Integer userId) {
-        User user;
         String sql = "SELECT id, email, login, name, birthdate FROM user_table " +
                 "WHERE id = ? " +
                 "LIMIT 1;";
-        List<User> resultList = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId);
 
-        if (resultList.size() == 1) {
-            user = resultList.get(0);
-
-            log.info("User found: id = {} login = {}", user.getId(), user.getLogin());
-
-            return user;
-        } else {
-            log.info("user with id = {} not found", userId);
-
-            throw new NullPointerException("Пользователь с Id = " + userId + " не найден.");
-        }
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId).stream().findFirst().orElseGet(null);
     }
 
     @Override
-    public User addUser(User user) {
+    public Integer addUser(User user) {
         SimpleJdbcInsert insertIntoUser = new SimpleJdbcInsert(jdbcTemplate).withTableName("user_table").usingGeneratedKeyColumns("id");
 
         final Map<String, Object> parameters = new HashMap<>();
@@ -65,14 +54,12 @@ public class UserDbStorage implements UserStorage {
 
         log.info("Created user with id {}", userId);
 
-        return findUser(userId);
+        return userId;
     }
 
     @Override
-    public User updateUser(User user) {
-        findUser(user.getId());//check that user exists
-
-        int rowsAffected = jdbcTemplate.update("UPDATE user_table " +
+    public void updateUser(User user) {
+        jdbcTemplate.update("UPDATE user_table " +
                         "SET email = ?, " +
                         "login = ?, " +
                         "name = ?, " +
@@ -84,44 +71,27 @@ public class UserDbStorage implements UserStorage {
                 user.getBirthday(),
                 user.getId());
 
-        if (rowsAffected == 0) {
-            throw new RuntimeException("User with id = " + user.getId() + " wasn't updated");
-        }
-
         log.info("User with id = {} was updated", user.getId());
-
-        return findUser(user.getId());
     }
 
     @Override
     public User addFriends(Integer userId, Integer friendId) {
-        findUser(userId);//check that user exists
-        findUser(friendId);//check that user exists
-
-        friendshipService.addFriends(userId, friendId);
-
-        return findUser(userId);
+        return null;
     }
 
     @Override
     public User removeFriend(Integer userId, Integer friendId) {
-        friendshipService.removeFriend(userId, friendId);
-
-        return findUser(userId);
+        return null;
     }
 
     @Override
     public Set<User> getFriendsList(Integer userId) {
-        return friendshipService.getFriendsForUser(userId).stream()
-                .map(this::findUser)
-                .collect(Collectors.toSet());
+        return null;
     }
 
     @Override
     public Set<User> getMutualFriends(Integer userId, Integer otherUserId) {
-        return friendshipService.getMutualFriends(userId, otherUserId).stream()
-                .map(this::findUser)
-                .collect(Collectors.toSet());
+        return null;
     }
 
     @Override
@@ -135,7 +105,6 @@ public class UserDbStorage implements UserStorage {
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))
                 .birthday(rs.getDate("birthdate").toLocalDate())
-                .friendsSet(friendshipService.getFriendsForUser(rs.getInt("id")))
                 .build();
     }
 }

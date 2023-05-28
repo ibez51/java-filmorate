@@ -7,6 +7,8 @@ import java.util.List;
 public interface FilmLikesDao {
     List<FilmLikes> getTopPopularFilms(Integer filmsCount);
 
+    boolean isLikeExists(Integer filmId, Integer userId);
+
     void likeFilm(Integer filmId, Integer userId);
 
     void dislikeFilm(Integer filmId, Integer userId);

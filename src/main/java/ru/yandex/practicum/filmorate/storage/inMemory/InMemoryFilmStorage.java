@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inMemory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,17 +44,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addFilm(Film film) {
+    public Integer addFilm(Film film) {
         film.setId(getNextId());
         filmsMap.put(film.getId(), film);
 
         log.info("Film {} added successfully", film);
 
-        return film;
+        return film.getId();
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public void updateFilm(Film film) {
         if (filmsMap.containsKey(film.getId())) {
             filmsMap.put(film.getId(), film);
 
@@ -62,14 +64,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
             throw new NullPointerException("Фильм с Id = " + film.getId() + " не найден");
         }
-
-        return film;
     }
 
     @Override
     public Film likeFilm(Integer filmId, Integer userId) {
-        Film film = findFilm(filmId);
         userStorage.findUser(userId);//check is User exists
+
+        Film film = findFilm(filmId);
 
         film.getUserLikesSet().add(userId);
 

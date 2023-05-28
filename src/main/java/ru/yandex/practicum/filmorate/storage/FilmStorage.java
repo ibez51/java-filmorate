@@ -10,9 +10,9 @@ public interface FilmStorage {
 
     Film findFilm(Integer filmId);
 
-    Film addFilm(Film film);
+    Integer addFilm(Film film);
 
-    Film updateFilm(Film film);
+    void updateFilm(Film film);
 
     Film likeFilm(Integer filmId, Integer userId);
 

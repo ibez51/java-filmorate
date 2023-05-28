@@ -1,9 +1,11 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inMemory;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @Qualifier("inMemoryStorage")
+@RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
     private static int idNumberSeq = 0;
     private final Map<Integer, User> usersMap = new HashMap<>();
@@ -29,16 +32,16 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    public User addUser(User user) {
+    public Integer addUser(User user) {
         user.setId(getNextId());
         usersMap.put(user.getId(), user);
 
         log.info("User {} added successfully", user);
 
-        return user;
+        return user.getId();
     }
 
-    public User updateUser(User user) {
+    public void updateUser(User user) {
         if (usersMap.containsKey(user.getId())) {
             usersMap.put(user.getId(), user);
 
@@ -48,8 +51,6 @@ public class InMemoryUserStorage implements UserStorage {
 
             throw new NullPointerException("пользователь с Id = " + user.getId() + " не найден");
         }
-
-        return user;
     }
 
     @Override

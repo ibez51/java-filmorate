@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.Dao;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+@Qualifier("dbStorage")
 @AllArgsConstructor
 public class FriendshipDaoImpl implements FriendshipDao {
     private final JdbcTemplate jdbcTemplate;
@@ -27,45 +29,38 @@ public class FriendshipDaoImpl implements FriendshipDao {
     }
 
     @Override
-    public void addFriends(Integer userId, Integer friendId) {
+    public boolean isFriendshipExists(Integer userId, Integer friendId) {
         String sql = "SELECT 'x' FROM friends_link " +
                 "WHERE user_id = ? " +
                 "AND friend_id = ? " +
                 "LIMIT 1;";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, userId, friendId);
 
-        if (!rowSet.next()) {
-            sql = "INSERT INTO friends_link " +
-                    "(user_id, friend_id, friendship_status_id) " +
-                    "VALUES (?, ?, 1);";
+        return rowSet.next();
+    }
 
-            jdbcTemplate.update(sql, userId, friendId);
+    @Override
+    public void addFriends(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO friends_link " +
+                "(user_id, friend_id, friendship_status_id) " +
+                "VALUES (?, ?, 1);";
 
-            log.info("User with id = {} was added to friends with {}", userId, friendId);
-        }
+        jdbcTemplate.update(sql, userId, friendId);
 
+        log.info("User with id = {} was added to friends with {}", userId, friendId);
+    }
 
-        sql = "SELECT 'x' FROM friends_link " +
-                "WHERE user_id = ? " +
-                "AND friend_id = ? " +
-                "LIMIT 1;";
+    @Override
+    public void updateFriendshipStatus(Integer userId, Integer friendId, Integer friendshipStatusId) {
+        String sql = "UPDATE friends_link " +
+                "SET friendship_status_id = ? " +
+                "WHERE (user_id = ? " +
+                "AND friend_id = ?) " +
+                "OR (user_id = ? " +
+                "AND friend_id = ?);";
+        jdbcTemplate.update(sql, friendshipStatusId, userId, friendId, friendId, userId);
 
-        rowSet = jdbcTemplate.queryForRowSet(sql, friendId, userId);
-        if (rowSet.next()) {
-            int rowsAffected = jdbcTemplate.update("UPDATE friends_link " +
-                            "SET friendship_status_id = ? " +
-                            "WHERE (user_id = ? " +
-                            "AND friend_id = ?) " +
-                            "OR (user_id = ? " +
-                            "AND friend_id = ?);",
-                    userId, friendId, friendId, userId);
-
-            if (rowsAffected != 2) {
-                throw new RuntimeException("Произошла ошибка при обновлении статуса дружбы. Обновилось " + rowsAffected + " записей вместо 2.");
-            }
-
-            log.info("Friendship status was updated for users {} and {}", userId, friendId);
-        }
+        log.info("Friendship status was updated for users {} and {}", userId, friendId);
     }
 
     @Override
@@ -86,16 +81,9 @@ public class FriendshipDaoImpl implements FriendshipDao {
                 "AND friend_id = ?;";
 
         jdbcTemplate.update(sql, userId, friendId);
-
-        sql = "UPDATE friends_link " +
-                "SET friendship_status_id = 1 " +
-                "WHERE user_id = ? " +
-                "AND friend_id = ?;";
-        jdbcTemplate.update(sql, friendId, userId);
     }
 
     private Friendship makeFriendship(ResultSet rs) throws SQLException {
-
         return Friendship.builder()
                 .userId(rs.getInt("user_id"))
                 .friendId(rs.getInt("friend_id"))
