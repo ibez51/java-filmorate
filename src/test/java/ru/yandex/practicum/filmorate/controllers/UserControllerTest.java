@@ -2,11 +2,14 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.exceptions.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FriendshipService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FriendshipDao;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryFriendshipStorage;
+import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -18,12 +21,16 @@ class UserControllerTest {
     UserController userController;
     UserStorage userStorage;
     UserService userService;
+    FriendshipService friendshipService;
+    FriendshipDao inMemoryFriendshipStorage;
 
     @BeforeEach
     void init() {
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
-        userController = new UserController(userStorage, userService);
+        inMemoryFriendshipStorage = new InMemoryFriendshipStorage(userStorage);
+        friendshipService = new FriendshipService(inMemoryFriendshipStorage);
+        userService = new UserService(userStorage, friendshipService);
+        userController = new UserController(userService);
 
         userStorage.resetIdNumberSeq();
     }
